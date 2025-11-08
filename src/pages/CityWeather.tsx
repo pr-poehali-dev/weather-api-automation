@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
@@ -11,8 +11,8 @@ const CityWeather = () => {
 
   if (!city) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0F1419] via-[#1A1F2C] to-[#0F1419] p-8 flex items-center justify-center">
-        <Card className="glass border-0">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
+        <Card>
           <CardContent className="p-8 text-center">
             <Icon name="AlertCircle" size={48} className="mx-auto mb-4 text-destructive" />
             <h2 className="text-2xl font-bold mb-2">Город не найден</h2>
@@ -32,262 +32,241 @@ const CityWeather = () => {
   const mockWind = Math.floor(Math.random() * 15) + 2;
   const mockClouds = Math.floor(Math.random() * 100);
   const mockVisibility = Math.floor(Math.random() * 10) + 5;
-  const mockUV = Math.floor(Math.random() * 11);
-  const mockDewPoint = mockTemp - 5;
   const mockFeelsLike = mockTemp - 3;
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0F1419] via-[#1A1F2C] to-[#0F1419] p-4 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex items-center gap-4 mb-6">
-          <Link to="/">
-            <Button variant="ghost" className="glass">
-              <Icon name="ArrowLeft" size={20} className="mr-2" />
-              На главную
-            </Button>
-          </Link>
-          <Link to="/cities">
-            <Button variant="ghost" className="glass">
-              Все города
-            </Button>
-          </Link>
-        </div>
+  const hourlyForecast = Array.from({ length: 24 }).map((_, idx) => ({
+    time: `${String(idx).padStart(2, '0')}:00`,
+    temp: mockTemp + Math.sin(idx / 3) * 4,
+    condition: idx % 3 === 0 ? 'CloudRain' : idx % 2 === 0 ? 'Cloud' : 'Sun',
+    wind: Math.floor(Math.random() * 15) + 2,
+  }));
 
-        <header className="glass rounded-2xl p-6 animate-fade-in">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl md:text-5xl font-bold text-primary glow">{city.name}</h1>
-              <p className="text-muted-foreground mt-2">{city.region} • Население: {(city.population / 1000).toFixed(0)}K</p>
-              <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-                <Icon name="MapPin" size={16} />
-                <span>{city.lat.toFixed(4)}° N, {city.lon.toFixed(4)}° E</span>
-              </div>
+  const dailyForecast = Array.from({ length: 10 }).map((_, idx) => {
+    const date = new Date();
+    date.setDate(date.getDate() + idx);
+    return {
+      day: idx === 0 ? 'Сегодня' : idx === 1 ? 'Завтра' : date.toLocaleDateString('ru-RU', { weekday: 'short' }),
+      date: date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }),
+      icon: idx % 3 === 0 ? 'CloudRain' : idx % 2 === 0 ? 'Cloud' : 'Sun',
+      condition: idx % 3 === 0 ? 'Дождь' : idx % 2 === 0 ? 'Облачно' : 'Ясно',
+      tempMax: Math.round(mockTemp + Math.sin(idx) * 5 + 2),
+      tempMin: Math.round(mockTemp + Math.sin(idx) * 5 - 3),
+      precip: idx % 3 === 0 ? 80 : 10,
+    };
+  });
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-between gap-4">
+            <Link to="/" className="flex items-center gap-2">
+              <Icon name="CloudSun" size={32} className="text-primary" />
+              <span className="text-2xl font-bold text-primary">RU-METEO</span>
+            </Link>
+
+            <div className="flex items-center gap-2">
+              <Link to="/">
+                <Button variant="outline" size="sm">
+                  <Icon name="Home" size={16} className="mr-2" />
+                  Главная
+                </Button>
+              </Link>
+              <Link to="/cities">
+                <Button variant="outline" size="sm">
+                  <Icon name="Map" size={16} className="mr-2" />
+                  Все города
+                </Button>
+              </Link>
             </div>
-            <Badge variant="outline" className="text-xl px-6 py-2">
-              {mockClouds > 70 ? 'Облачно' : mockClouds > 30 ? 'Переменная облачность' : 'Ясно'}
-            </Badge>
           </div>
-        </header>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">{city.name}</h1>
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <span>{city.region}</span>
+            <span>•</span>
+            <span>Население: {(city.population / 1000).toFixed(0)}K</span>
+            <span>•</span>
+            <div className="flex items-center gap-1">
+              <Icon name="MapPin" size={14} />
+              <span>{city.lat.toFixed(2)}°, {city.lon.toFixed(2)}°</span>
+            </div>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="lg:col-span-2 glass border-0 animate-slide-up">
-            <CardHeader>
-              <CardTitle className="text-2xl">Текущая погода</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center gap-8">
-                <Icon name={mockClouds > 70 ? 'Cloud' : mockClouds > 30 ? 'CloudSun' : 'Sun'} size={100} className="text-primary" />
-                <div>
-                  <div className="text-8xl font-bold glow">{mockTemp}°</div>
-                  <div className="text-muted-foreground mt-2 text-lg">
-                    Ощущается как {mockFeelsLike}°
+          <div className="lg:col-span-2 space-y-6">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-6">
+                    <Icon name={mockClouds > 70 ? 'Cloud' : mockClouds > 30 ? 'CloudSun' : 'Sun'} size={80} className="text-primary" />
+                    <div>
+                      <div className="text-6xl font-bold">{mockTemp}°</div>
+                      <div className="text-muted-foreground mt-1">
+                        Ощущается как {mockFeelsLike}°
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6">
-                <div className="glass p-4 rounded-xl text-center hover:glow-box transition-all">
-                  <Icon name="Droplets" size={28} className="mx-auto mb-3 text-primary" />
-                  <div className="text-3xl font-bold">{mockHumidity}%</div>
-                  <div className="text-xs text-muted-foreground mt-2">Влажность</div>
-                </div>
-                <div className="glass p-4 rounded-xl text-center hover:glow-box transition-all">
-                  <Icon name="Gauge" size={28} className="mx-auto mb-3 text-primary" />
-                  <div className="text-3xl font-bold">{mockPressure}</div>
-                  <div className="text-xs text-muted-foreground mt-2">мм рт.ст.</div>
-                </div>
-                <div className="glass p-4 rounded-xl text-center hover:glow-box transition-all">
-                  <Icon name="Wind" size={28} className="mx-auto mb-3 text-primary" />
-                  <div className="text-3xl font-bold">{mockWind}</div>
-                  <div className="text-xs text-muted-foreground mt-2">м/с</div>
-                </div>
-                <div className="glass p-4 rounded-xl text-center hover:glow-box transition-all">
-                  <Icon name="Eye" size={28} className="mx-auto mb-3 text-primary" />
-                  <div className="text-3xl font-bold">{mockVisibility}</div>
-                  <div className="text-xs text-muted-foreground mt-2">км</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass border-0 animate-slide-up">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Icon name="Info" size={20} />
-                Дополнительно
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="glass p-4 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-muted-foreground">Восход</span>
-                  <div className="flex items-center gap-2">
-                    <Icon name="Sunrise" size={16} className="text-primary" />
-                    <span className="font-bold">06:42</span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Закат</span>
-                  <div className="flex items-center gap-2">
-                    <Icon name="Sunset" size={16} className="text-primary" />
-                    <span className="font-bold">18:24</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="glass p-4 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Облачность</span>
-                  <span className="font-bold">{mockClouds}%</span>
-                </div>
-              </div>
-
-              <div className="glass p-4 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Точка росы</span>
-                  <span className="font-bold">{mockDewPoint}°C</span>
-                </div>
-              </div>
-
-              <div className="glass p-4 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">УФ индекс</span>
-                  <Badge variant={mockUV > 7 ? 'destructive' : mockUV > 3 ? 'default' : 'secondary'}>
-                    {mockUV} / 10
+                  <Badge variant="outline" className="text-lg px-4 py-2">
+                    {mockClouds > 70 ? 'Облачно' : mockClouds > 30 ? 'Переменная облачность' : 'Ясно'}
                   </Badge>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="glass border-0">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Icon name="Thermometer" size={16} />
-                Температура
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold glow">{mockTemp}°C</div>
-              <div className="text-xs text-muted-foreground mt-1">Мин: {mockTemp - 3}° • Макс: {mockTemp + 2}°</div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass border-0">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Icon name="CloudRain" size={16} />
-                Осадки
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">0 мм</div>
-              <div className="text-xs text-muted-foreground mt-1">За последний час</div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass border-0">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Icon name="Navigation" size={16} />
-                Направление ветра
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">СЗ</div>
-              <div className="text-xs text-muted-foreground mt-1">330° азимут</div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass border-0">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Icon name="Waves" size={16} />
-                Атмосферное давление
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{mockPressure}</div>
-              <div className="text-xs text-muted-foreground mt-1">мм рт. ст.</div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card className="glass border-0">
-          <CardHeader>
-            <CardTitle>Почасовой прогноз на 24 часа</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex overflow-x-auto gap-4 pb-4">
-              {Array.from({ length: 24 }).map((_, idx) => {
-                const hourTemp = mockTemp + Math.sin(idx / 3) * 4;
-                return (
-                  <div key={idx} className="glass p-4 rounded-lg min-w-[100px] text-center">
-                    <div className="text-sm text-muted-foreground mb-2">
-                      {String(idx).padStart(2, '0')}:00
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="bg-secondary/50 p-4 rounded-lg">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                      <Icon name="Droplets" size={16} />
+                      <span>Влажность</span>
                     </div>
-                    <Icon 
-                      name={idx >= 6 && idx <= 18 ? 'Sun' : 'Moon'} 
-                      size={32} 
-                      className="mx-auto mb-2 text-primary" 
-                    />
-                    <div className="text-xl font-bold">{Math.round(hourTemp)}°</div>
-                    <div className="text-xs text-muted-foreground mt-2">
-                      {Math.floor(Math.random() * 15) + 5} м/с
-                    </div>
+                    <div className="text-2xl font-bold">{mockHumidity}%</div>
                   </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
+                  <div className="bg-secondary/50 p-4 rounded-lg">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                      <Icon name="Gauge" size={16} />
+                      <span>Давление</span>
+                    </div>
+                    <div className="text-2xl font-bold">{mockPressure}</div>
+                    <div className="text-xs text-muted-foreground">мм рт.ст.</div>
+                  </div>
+                  <div className="bg-secondary/50 p-4 rounded-lg">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                      <Icon name="Wind" size={16} />
+                      <span>Ветер</span>
+                    </div>
+                    <div className="text-2xl font-bold">{mockWind}</div>
+                    <div className="text-xs text-muted-foreground">м/с</div>
+                  </div>
+                  <div className="bg-secondary/50 p-4 rounded-lg">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                      <Icon name="Eye" size={16} />
+                      <span>Видимость</span>
+                    </div>
+                    <div className="text-2xl font-bold">{mockVisibility}</div>
+                    <div className="text-xs text-muted-foreground">км</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-        <Card className="glass border-0">
-          <CardHeader>
-            <CardTitle>Прогноз на 10 дней</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {Array.from({ length: 10 }).map((_, idx) => {
-                const dayTemp = mockTemp + Math.sin(idx) * 5;
-                const date = new Date();
-                date.setDate(date.getDate() + idx);
-                return (
-                  <div key={idx} className="glass p-4 rounded-lg flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-24">
-                        <div className="font-semibold">
-                          {idx === 0 ? 'Сегодня' : idx === 1 ? 'Завтра' : date.toLocaleDateString('ru-RU', { weekday: 'short' })}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="text-xl font-bold mb-4">Почасовой прогноз</h2>
+                <div className="flex gap-3 overflow-x-auto pb-4">
+                  {hourlyForecast.map((item, idx) => (
+                    <div key={idx} className="flex flex-col items-center min-w-[90px] p-3 bg-secondary/30 rounded-lg">
+                      <div className="text-sm font-medium mb-2">{item.time}</div>
+                      <Icon name={item.condition as any} size={28} className="text-primary mb-2" />
+                      <div className="text-lg font-bold">{Math.round(item.temp)}°</div>
+                      <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                        <Icon name="Wind" size={10} />
+                        {item.wind} м/с
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="text-xl font-bold mb-4">Прогноз на 10 дней</h2>
+                <div className="space-y-2">
+                  {dailyForecast.map((item, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-3 bg-secondary/20 rounded-lg hover:bg-secondary/40 transition-colors">
+                      <div className="flex items-center gap-4 flex-1">
+                        <div className="w-20 font-medium">{item.day}</div>
+                        <div className="text-sm text-muted-foreground w-20">{item.date}</div>
+                        <Icon name={item.icon as any} size={28} className="text-primary" />
+                        <span className="text-sm text-muted-foreground w-24">{item.condition}</span>
+                      </div>
+                      <div className="flex items-center gap-6">
+                        <div className="text-sm text-muted-foreground">{item.precip}%</div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-muted-foreground">{item.tempMin}°</span>
+                          <div className="w-24 h-2 bg-gradient-to-r from-blue-300 to-orange-300 rounded-full" />
+                          <span className="font-bold text-lg">{item.tempMax}°</span>
                         </div>
                       </div>
-                      <Icon name={idx % 3 === 0 ? 'CloudRain' : idx % 2 === 0 ? 'Cloud' : 'Sun'} size={28} className="text-primary" />
-                      <span className="text-sm text-muted-foreground w-32">
-                        {idx % 3 === 0 ? 'Дождь' : idx % 2 === 0 ? 'Облачно' : 'Ясно'}
-                      </span>
                     </div>
-                    <div className="flex items-center gap-6">
-                      <div className="text-right">
-                        <div className="text-sm text-muted-foreground">Осадки</div>
-                        <div className="font-semibold">{idx % 3 === 0 ? '80%' : '10%'}</div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="space-y-6">
+            <Card>
+              <CardContent className="p-6 space-y-3">
+                <h3 className="font-bold mb-3">Дополнительная информация</h3>
+                
+                <div className="bg-secondary/30 p-3 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-muted-foreground">Восход</span>
+                    <div className="flex items-center gap-2">
+                      <Icon name="Sunrise" size={16} className="text-primary" />
+                      <span className="font-bold">06:42</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Закат</span>
+                    <div className="flex items-center gap-2">
+                      <Icon name="Sunset" size={16} className="text-primary" />
+                      <span className="font-bold">18:24</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-secondary/30 p-3 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Облачность</span>
+                    <span className="font-bold">{mockClouds}%</span>
+                  </div>
+                </div>
+
+                <div className="bg-secondary/30 p-3 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Точка росы</span>
+                    <span className="font-bold">{mockTemp - 5}°C</span>
+                  </div>
+                </div>
+
+                <div className="bg-secondary/30 p-3 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">УФ индекс</span>
+                    <Badge>{Math.floor(Math.random() * 11)}</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-blue-50 border-blue-200">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-3">
+                  <Icon name="Info" size={24} className="text-primary mt-1" />
+                  <div>
+                    <h3 className="font-bold mb-2">Магнитные бури</h3>
+                    <div className="text-sm space-y-2">
+                      <div className="flex justify-between">
+                        <span>Сегодня:</span>
+                        <span className="font-medium text-green-600">Спокойно</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground">{Math.round(dayTemp - 3)}°</span>
-                        <div className="w-32 h-2 bg-gradient-to-r from-blue-500 to-red-500 rounded-full" />
-                        <span className="font-bold text-xl">{Math.round(dayTemp + 2)}°</span>
+                      <div className="flex justify-between">
+                        <span>Завтра:</span>
+                        <span className="font-medium text-yellow-600">Слабо</span>
                       </div>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </main>
     </div>
   );
 };
