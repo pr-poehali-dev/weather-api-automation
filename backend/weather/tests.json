@@ -1,0 +1,27 @@
+{
+  "tests": [
+    {
+      "name": "Get weather by coordinates",
+      "method": "GET",
+      "path": "/?lat=55.7558&lon=37.6173",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "temp": "number",
+        "humidity": "number",
+        "wind_speed": "number"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Get weather by city name",
+      "method": "GET",
+      "path": "/?city=Москва",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "temp": "number",
+        "city_name": "string"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

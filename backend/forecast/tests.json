@@ -1,0 +1,26 @@
+{
+  "tests": [
+    {
+      "name": "Get forecast by coordinates",
+      "method": "GET",
+      "path": "/?lat=55.7558&lon=37.6173",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "city_name": "string",
+        "forecast": "array"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Get forecast by city name",
+      "method": "GET",
+      "path": "/?city=Казань",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "city_name": "string",
+        "forecast": "array"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
