@@ -126,14 +126,14 @@ const Index = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <div className="bg-secondary/50 rounded-lg p-4">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                       <Icon name="Wind" size={16} />
                       <span>Ветер</span>
                     </div>
                     <div className="text-2xl font-bold">5.6 м/с</div>
-                    <div className="text-xs text-muted-foreground">СЗ</div>
+                    <div className="text-xs text-muted-foreground">СЗ, порывы до 12 м/с</div>
                   </div>
                   <div className="bg-secondary/50 rounded-lg p-4">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
@@ -141,7 +141,7 @@ const Index = () => {
                       <span>Давление</span>
                     </div>
                     <div className="text-2xl font-bold">761</div>
-                    <div className="text-xs text-muted-foreground">мм рт.ст.</div>
+                    <div className="text-xs text-muted-foreground">мм рт.ст. (1015 гПа)</div>
                   </div>
                   <div className="bg-secondary/50 rounded-lg p-4">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
@@ -149,6 +149,7 @@ const Index = () => {
                       <span>Влажность</span>
                     </div>
                     <div className="text-2xl font-bold">89%</div>
+                    <div className="text-xs text-muted-foreground">Очень влажно</div>
                   </div>
                   <div className="bg-secondary/50 rounded-lg p-4">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
@@ -156,6 +157,71 @@ const Index = () => {
                       <span>Видимость</span>
                     </div>
                     <div className="text-2xl font-bold">10 км</div>
+                    <div className="text-xs text-muted-foreground">Хорошая</div>
+                  </div>
+                  <div className="bg-secondary/50 rounded-lg p-4">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                      <Icon name="CloudRain" size={16} />
+                      <span>Осадки</span>
+                    </div>
+                    <div className="text-2xl font-bold">0 мм</div>
+                    <div className="text-xs text-muted-foreground">За последний час</div>
+                  </div>
+                  <div className="bg-secondary/50 rounded-lg p-4">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                      <Icon name="Cloud" size={16} />
+                      <span>Облачность</span>
+                    </div>
+                    <div className="text-2xl font-bold">85%</div>
+                    <div className="text-xs text-muted-foreground">Пасмурно</div>
+                  </div>
+                  <div className="bg-secondary/50 rounded-lg p-4">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                      <Icon name="Sunrise" size={16} />
+                      <span>Восход</span>
+                    </div>
+                    <div className="text-2xl font-bold">06:42</div>
+                    <div className="text-xs text-muted-foreground">Закат в 18:24</div>
+                  </div>
+                  <div className="bg-secondary/50 rounded-lg p-4">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                      <Icon name="Thermometer" size={16} />
+                      <span>Точка росы</span>
+                    </div>
+                    <div className="text-2xl font-bold">-7°C</div>
+                    <div className="text-xs text-muted-foreground">Влажно</div>
+                  </div>
+                  <div className="bg-secondary/50 rounded-lg p-4">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                      <Icon name="Sun" size={16} />
+                      <span>УФ индекс</span>
+                    </div>
+                    <div className="text-2xl font-bold">2</div>
+                    <div className="text-xs text-muted-foreground">Низкий</div>
+                  </div>
+                  <div className="bg-secondary/50 rounded-lg p-4">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                      <Icon name="Navigation" size={16} />
+                      <span>Направление</span>
+                    </div>
+                    <div className="text-2xl font-bold">330°</div>
+                    <div className="text-xs text-muted-foreground">Северо-западный</div>
+                  </div>
+                  <div className="bg-secondary/50 rounded-lg p-4">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                      <Icon name="Waves" size={16} />
+                      <span>Снежный покров</span>
+                    </div>
+                    <div className="text-2xl font-bold">12 см</div>
+                    <div className="text-xs text-muted-foreground">Умеренный</div>
+                  </div>
+                  <div className="bg-secondary/50 rounded-lg p-4">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                      <Icon name="Clock" size={16} />
+                      <span>Продолж. дня</span>
+                    </div>
+                    <div className="text-2xl font-bold">11:42</div>
+                    <div className="text-xs text-muted-foreground">Часов</div>
                   </div>
                 </div>
               </CardContent>
@@ -233,7 +299,7 @@ const Index = () => {
               <CardContent className="p-6">
                 <div className="flex items-start gap-3">
                   <Icon name="Info" size={24} className="text-primary mt-1" />
-                  <div>
+                  <div className="w-full">
                     <h3 className="font-bold mb-2">Магнитные бури</h3>
                     <div className="text-sm space-y-2">
                       <div className="flex justify-between">
@@ -249,6 +315,75 @@ const Index = () => {
                         <span className="font-medium text-green-600">Спокойно</span>
                       </div>
                     </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-orange-50 border-orange-200">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-3">
+                  <Icon name="AlertTriangle" size={24} className="text-orange-600 mt-1" />
+                  <div className="w-full">
+                    <h3 className="font-bold mb-2">Индекс загрязнения воздуха</h3>
+                    <div className="text-sm space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span>PM2.5:</span>
+                        <span className="font-medium text-green-600">42 (Хорошо)</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span>PM10:</span>
+                        <span className="font-medium text-green-600">38 (Хорошо)</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span>O₃:</span>
+                        <span className="font-medium text-yellow-600">68 (Средне)</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-purple-50 border-purple-200">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-3">
+                  <Icon name="Moon" size={24} className="text-purple-600 mt-1" />
+                  <div className="w-full">
+                    <h3 className="font-bold mb-2">Фазы Луны</h3>
+                    <div className="text-sm space-y-2">
+                      <div className="flex justify-between">
+                        <span>Фаза:</span>
+                        <span className="font-medium">Убывающая</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Видимость:</span>
+                        <span className="font-medium">68%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Восход:</span>
+                        <span className="font-medium">22:14</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="font-bold mb-3 flex items-center gap-2">
+                  <Icon name="CalendarDays" size={20} />
+                  Праздники и события
+                </h3>
+                <div className="text-sm space-y-2">
+                  <div className="p-2 bg-secondary/30 rounded">
+                    <div className="font-medium">8 ноября</div>
+                    <div className="text-xs text-muted-foreground">День памяти погибших при исполнении</div>
+                  </div>
+                  <div className="p-2 bg-secondary/30 rounded">
+                    <div className="font-medium">10 ноября</div>
+                    <div className="text-xs text-muted-foreground">День сотрудника органов внутренних дел</div>
                   </div>
                 </div>
               </CardContent>

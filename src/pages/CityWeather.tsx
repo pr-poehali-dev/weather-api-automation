@@ -117,13 +117,14 @@ const CityWeather = () => {
                   </Badge>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <div className="bg-secondary/50 p-4 rounded-lg">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                       <Icon name="Droplets" size={16} />
                       <span>Влажность</span>
                     </div>
                     <div className="text-2xl font-bold">{mockHumidity}%</div>
+                    <div className="text-xs text-muted-foreground">{mockHumidity > 70 ? 'Влажно' : 'Комфортно'}</div>
                   </div>
                   <div className="bg-secondary/50 p-4 rounded-lg">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
@@ -131,7 +132,7 @@ const CityWeather = () => {
                       <span>Давление</span>
                     </div>
                     <div className="text-2xl font-bold">{mockPressure}</div>
-                    <div className="text-xs text-muted-foreground">мм рт.ст.</div>
+                    <div className="text-xs text-muted-foreground">мм рт.ст. ({Math.round(mockPressure * 1.333)} гПа)</div>
                   </div>
                   <div className="bg-secondary/50 p-4 rounded-lg">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
@@ -139,7 +140,7 @@ const CityWeather = () => {
                       <span>Ветер</span>
                     </div>
                     <div className="text-2xl font-bold">{mockWind}</div>
-                    <div className="text-xs text-muted-foreground">м/с</div>
+                    <div className="text-xs text-muted-foreground">м/с, порывы до {mockWind + 3}</div>
                   </div>
                   <div className="bg-secondary/50 p-4 rounded-lg">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
@@ -147,7 +148,39 @@ const CityWeather = () => {
                       <span>Видимость</span>
                     </div>
                     <div className="text-2xl font-bold">{mockVisibility}</div>
-                    <div className="text-xs text-muted-foreground">км</div>
+                    <div className="text-xs text-muted-foreground">км, {mockVisibility > 8 ? 'хорошая' : 'средняя'}</div>
+                  </div>
+                  <div className="bg-secondary/50 p-4 rounded-lg">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                      <Icon name="CloudRain" size={16} />
+                      <span>Осадки</span>
+                    </div>
+                    <div className="text-2xl font-bold">0.2 мм</div>
+                    <div className="text-xs text-muted-foreground">За последний час</div>
+                  </div>
+                  <div className="bg-secondary/50 p-4 rounded-lg">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                      <Icon name="Cloud" size={16} />
+                      <span>Облачность</span>
+                    </div>
+                    <div className="text-2xl font-bold">{mockClouds}%</div>
+                    <div className="text-xs text-muted-foreground">{mockClouds > 70 ? 'Пасмурно' : mockClouds > 30 ? 'Облачно' : 'Ясно'}</div>
+                  </div>
+                  <div className="bg-secondary/50 p-4 rounded-lg">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                      <Icon name="Navigation" size={16} />
+                      <span>Направление</span>
+                    </div>
+                    <div className="text-2xl font-bold">СЗ</div>
+                    <div className="text-xs text-muted-foreground">330° азимут</div>
+                  </div>
+                  <div className="bg-secondary/50 p-4 rounded-lg">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                      <Icon name="Thermometer" size={16} />
+                      <span>Точка росы</span>
+                    </div>
+                    <div className="text-2xl font-bold">{mockTemp - 5}°</div>
+                    <div className="text-xs text-muted-foreground">Конденсация</div>
                   </div>
                 </div>
               </CardContent>
@@ -241,6 +274,27 @@ const CityWeather = () => {
                     <Badge>{Math.floor(Math.random() * 11)}</Badge>
                   </div>
                 </div>
+
+                <div className="bg-secondary/30 p-3 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Продолж. дня</span>
+                    <span className="font-bold">11:42</span>
+                  </div>
+                </div>
+
+                <div className="bg-secondary/30 p-3 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Снежный покров</span>
+                    <span className="font-bold">{mockTemp < 0 ? '12 см' : '0 см'}</span>
+                  </div>
+                </div>
+
+                <div className="bg-secondary/30 p-3 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Индекс тепла</span>
+                    <span className="font-bold">{mockTemp > 20 ? mockTemp + 2 + '°' : 'Н/Д'}</span>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
@@ -248,7 +302,7 @@ const CityWeather = () => {
               <CardContent className="p-6">
                 <div className="flex items-start gap-3">
                   <Icon name="Info" size={24} className="text-primary mt-1" />
-                  <div>
+                  <div className="w-full">
                     <h3 className="font-bold mb-2">Магнитные бури</h3>
                     <div className="text-sm space-y-2">
                       <div className="flex justify-between">
@@ -258,6 +312,48 @@ const CityWeather = () => {
                       <div className="flex justify-between">
                         <span>Завтра:</span>
                         <span className="font-medium text-yellow-600">Слабо</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-orange-50 border-orange-200">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-3">
+                  <Icon name="AlertTriangle" size={24} className="text-orange-600 mt-1" />
+                  <div className="w-full">
+                    <h3 className="font-bold mb-2">Качество воздуха</h3>
+                    <div className="text-sm space-y-2">
+                      <div className="flex justify-between">
+                        <span>AQI:</span>
+                        <span className="font-medium text-green-600">42 (Хорошо)</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>PM2.5:</span>
+                        <span className="font-medium text-green-600">38 мкг/м³</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-purple-50 border-purple-200">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-3">
+                  <Icon name="Moon" size={24} className="text-purple-600 mt-1" />
+                  <div className="w-full">
+                    <h3 className="font-bold mb-2">Луна</h3>
+                    <div className="text-sm space-y-2">
+                      <div className="flex justify-between">
+                        <span>Фаза:</span>
+                        <span className="font-medium">Убывающая</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Видимость:</span>
+                        <span className="font-medium">68%</span>
                       </div>
                     </div>
                   </div>
