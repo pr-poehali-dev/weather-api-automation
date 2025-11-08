@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import { russianCities } from '@/data/cities';
 import { getCurrentWeatherByCoords, getWeatherIcon, type WeatherData } from '@/lib/weatherApi';
-import { useSEO, addStructuredData } from '@/utils/seo';
+import { useSEO, addStructuredData, addBreadcrumbSchema } from '@/utils/seo';
 
 const Cities = () => {
   const [search, setSearch] = useState('');
@@ -59,11 +59,17 @@ const Cities = () => {
             '@type': 'GeoCoordinates',
             'latitude': city.lat,
             'longitude': city.lon
-          }
+          },
+          'url': `https://masclimat.ru/city/${city.name}`
         }
       }))
     };
-    addStructuredData(schema);
+    addStructuredData(schema, 'cities-list-schema');
+
+    addBreadcrumbSchema([
+      { name: 'Главная', url: 'https://masclimat.ru' },
+      { name: 'Города России', url: 'https://masclimat.ru/cities' }
+    ]);
   }, []);
 
   useEffect(() => {

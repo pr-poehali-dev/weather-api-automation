@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import { russianCities } from '@/data/cities';
 import { getCurrentWeather, getForecast, getWeatherIcon, getWindDirection, getVisibilityQuality, getHumidityComfort, type WeatherData, type ForecastData } from '@/lib/weatherApi';
-import { useSEO, addStructuredData, generateWeatherSchema } from '@/utils/seo';
+import { useSEO, addStructuredData, generateDetailedWeatherSchema, addBreadcrumbSchema } from '@/utils/seo';
 
 const CityMap = lazy(() => import('@/components/CityMap'));
 
@@ -55,11 +55,32 @@ const Index = () => {
   }, [selectedCity]);
 
   useEffect(() => {
-    if (weatherData) {
-      const schema = generateWeatherSchema(selectedCity, weatherData.temp, weatherData.condition);
-      addStructuredData(schema);
+    if (weatherData && selectedCityData) {
+      const detailedSchema = generateDetailedWeatherSchema({
+        city: selectedCity,
+        region: selectedCityData.region,
+        lat: selectedCityData.lat,
+        lon: selectedCityData.lon,
+        temp: weatherData.temp,
+        feelsLike: weatherData.feels_like,
+        condition: weatherData.condition,
+        humidity: weatherData.humidity,
+        pressure: weatherData.pressure,
+        windSpeed: weatherData.wind_speed,
+        windDeg: weatherData.wind_deg,
+        visibility: weatherData.visibility,
+        clouds: weatherData.clouds,
+        sunrise: weatherData.sunrise,
+        sunset: weatherData.sunset
+      });
+      addStructuredData(detailedSchema, 'weather-schema');
+
+      addBreadcrumbSchema([
+        { name: 'Главная', url: 'https://masclimat.ru' },
+        { name: selectedCity, url: `https://masclimat.ru/city/${selectedCity}` }
+      ]);
     }
-  }, [weatherData, selectedCity]);
+  }, [weatherData, selectedCity, selectedCityData]);
 
   const currentTemp = weatherData?.temp ?? -5;
   const feelsLike = weatherData?.feels_like ?? -9;

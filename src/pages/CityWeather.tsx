@@ -7,7 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import Icon from '@/components/ui/icon';
 import { russianCities } from '@/data/cities';
 import { getCurrentWeatherByCoords, getForecastByCoords, getWeatherIcon, getWindDirection, getVisibilityQuality, getHumidityComfort, type WeatherData, type ForecastData } from '@/lib/weatherApi';
-import { useSEO, addStructuredData } from '@/utils/seo';
+import { useSEO, addStructuredData, generateDetailedWeatherSchema, addBreadcrumbSchema } from '@/utils/seo';
 
 const CityMap = lazy(() => import('@/components/CityMap'));
 
@@ -52,40 +52,30 @@ const CityWeather = () => {
 
   useEffect(() => {
     if (city && weatherData) {
-      const schema = {
-        '@context': 'https://schema.org',
-        '@type': 'Place',
-        'name': city.name,
-        'description': city.description || `Город ${city.name} в ${city.region}`,
-        'geo': {
-          '@type': 'GeoCoordinates',
-          'latitude': city.lat,
-          'longitude': city.lon
-        },
-        'address': {
-          '@type': 'PostalAddress',
-          'addressRegion': city.region,
-          'addressCountry': 'RU'
-        },
-        'additionalProperty': [
-          {
-            '@type': 'PropertyValue',
-            'name': 'Температура',
-            'value': `${weatherData.temp}°C`
-          },
-          {
-            '@type': 'PropertyValue',
-            'name': 'Влажность',
-            'value': `${weatherData.humidity}%`
-          },
-          {
-            '@type': 'PropertyValue',
-            'name': 'Давление',
-            'value': `${weatherData.pressure} гПа`
-          }
-        ]
-      };
-      addStructuredData(schema);
+      const detailedSchema = generateDetailedWeatherSchema({
+        city: city.name,
+        region: city.region,
+        lat: city.lat,
+        lon: city.lon,
+        temp: weatherData.temp,
+        feelsLike: weatherData.feels_like,
+        condition: weatherData.condition,
+        humidity: weatherData.humidity,
+        pressure: weatherData.pressure,
+        windSpeed: weatherData.wind_speed,
+        windDeg: weatherData.wind_deg,
+        visibility: weatherData.visibility,
+        clouds: weatherData.clouds,
+        sunrise: weatherData.sunrise,
+        sunset: weatherData.sunset
+      });
+      addStructuredData(detailedSchema, 'weather-schema');
+
+      addBreadcrumbSchema([
+        { name: 'Главная', url: 'https://masclimat.ru' },
+        { name: 'Города России', url: 'https://masclimat.ru/cities' },
+        { name: city.name, url: `https://masclimat.ru/city/${city.name}` }
+      ]);
     }
   }, [city, weatherData]);
 
