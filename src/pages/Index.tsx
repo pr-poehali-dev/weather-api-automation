@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import { russianCities } from '@/data/cities';
 import { getCurrentWeather, getForecast, getWeatherIcon, getWindDirection, getVisibilityQuality, getHumidityComfort, type WeatherData, type ForecastData } from '@/lib/weatherApi';
+
+const CityMap = lazy(() => import('@/components/CityMap'));
 
 const Index = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -47,6 +49,8 @@ const Index = () => {
   const currentTemp = weatherData?.temp ?? -5;
   const feelsLike = weatherData?.feels_like ?? -9;
   const condition = weatherData?.condition ?? 'пасмурно';
+  
+  const selectedCityData = russianCities.find(c => c.name === selectedCity);
 
   const hourlyForecast = forecastData
     ? forecastData.forecast.slice(0, 6).map((item, idx) => ({
@@ -324,6 +328,32 @@ const Index = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {selectedCityData && (
+              <Card>
+                <CardContent className="p-6">
+                  <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                    <Icon name="Map" size={24} />
+                    Местоположение на карте
+                  </h2>
+                  <Suspense fallback={
+                    <div className="w-full h-[300px] rounded-lg bg-secondary/30 flex items-center justify-center">
+                      <div className="text-center">
+                        <Icon name="Loader2" size={32} className="animate-spin text-primary mx-auto mb-2" />
+                        <div className="text-sm text-muted-foreground">Загрузка карты...</div>
+                      </div>
+                    </div>
+                  }>
+                    <CityMap 
+                      lat={selectedCityData.lat} 
+                      lon={selectedCityData.lon} 
+                      cityName={selectedCityData.name}
+                      zoom={10}
+                    />
+                  </Suspense>
+                </CardContent>
+              </Card>
+            )}
 
             <Card>
               <CardContent className="p-6">

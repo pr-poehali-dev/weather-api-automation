@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,8 @@ import { Separator } from '@/components/ui/separator';
 import Icon from '@/components/ui/icon';
 import { russianCities } from '@/data/cities';
 import { getCurrentWeatherByCoords, getForecastByCoords, getWeatherIcon, getWindDirection, getVisibilityQuality, getHumidityComfort, type WeatherData, type ForecastData } from '@/lib/weatherApi';
+
+const CityMap = lazy(() => import('@/components/CityMap'));
 
 const CityWeather = () => {
   const { cityName } = useParams<{ cityName: string }>();
@@ -349,6 +351,25 @@ const CityWeather = () => {
                     <div className="text-xs text-muted-foreground">Конденсация</div>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                  <Icon name="Map" size={24} />
+                  Местоположение на карте
+                </h2>
+                <Suspense fallback={
+                  <div className="w-full h-[400px] rounded-lg bg-secondary/30 flex items-center justify-center">
+                    <div className="text-center">
+                      <Icon name="Loader2" size={32} className="animate-spin text-primary mx-auto mb-2" />
+                      <div className="text-sm text-muted-foreground">Загрузка карты...</div>
+                    </div>
+                  </div>
+                }>
+                  <CityMap lat={city.lat} lon={city.lon} cityName={city.name} />
+                </Suspense>
               </CardContent>
             </Card>
 
