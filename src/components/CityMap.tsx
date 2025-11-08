@@ -13,17 +13,21 @@ const CityMap = ({ lat, lon, cityName, zoom = 11 }: CityMapProps) => {
   useEffect(() => {
     if (!mapRef.current) return;
 
-    const apiKey = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
-    const mapboxUrl = `https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s+ff0000(${lon},${lat})/${lon},${lat},${zoom},0/600x400@2x?access_token=${apiKey}`;
+    const osmUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${lon - 0.1},${lat - 0.1},${lon + 0.1},${lat + 0.1}&layer=mapnik&marker=${lat},${lon}`;
 
     mapRef.current.innerHTML = `
       <div class="relative w-full h-full">
-        <img 
-          src="${mapboxUrl}" 
-          alt="Карта ${cityName}"
-          class="w-full h-full object-cover rounded-lg"
-        />
-        <div class="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg">
+        <iframe
+          width="100%"
+          height="100%"
+          frameborder="0"
+          scrolling="no"
+          marginheight="0"
+          marginwidth="0"
+          src="${osmUrl}"
+          style="border: 0; border-radius: 0.5rem;"
+        ></iframe>
+        <div class="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg z-10 pointer-events-none">
           <div class="font-bold text-sm">${cityName}</div>
           <div class="text-xs text-muted-foreground">${lat.toFixed(4)}°, ${lon.toFixed(4)}°</div>
         </div>
