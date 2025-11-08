@@ -7,6 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import Icon from '@/components/ui/icon';
 import { russianCities } from '@/data/cities';
 import { getCurrentWeatherByCoords, getForecastByCoords, getWeatherIcon, getWindDirection, getVisibilityQuality, getHumidityComfort, type WeatherData, type ForecastData } from '@/lib/weatherApi';
+import { useSEO, addStructuredData } from '@/utils/seo';
 
 const CityMap = lazy(() => import('@/components/CityMap'));
 
@@ -17,6 +18,13 @@ const CityWeather = () => {
   const [forecastData, setForecastData] = useState<ForecastData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useSEO({
+    title: city ? `Погода в ${city.name} на сегодня, завтра и 10 дней | ${city.region} | MASCLIMAT.RU` : 'MASCLIMAT.RU',
+    description: city ? `Актуальный прогноз погоды в городе ${city.name} (${city.region}). Точная температура, влажность, давление, ветер, осадки. Почасовой прогноз на 24 часа и детальный прогноз на 10 дней. ${city.description || ''}` : 'Прогноз погоды',
+    keywords: city ? `погода ${city.name}, прогноз погоды ${city.name}, температура ${city.name}, погода на сегодня ${city.name}, погода на завтра ${city.name}, ${city.region}` : '',
+    canonicalUrl: city ? `https://masclimat.ru/city/${city.name}` : 'https://masclimat.ru'
+  });
 
   useEffect(() => {
     if (!city) return;
@@ -41,6 +49,45 @@ const CityWeather = () => {
 
     loadWeatherData();
   }, [city]);
+
+  useEffect(() => {
+    if (city && weatherData) {
+      const schema = {
+        '@context': 'https://schema.org',
+        '@type': 'Place',
+        'name': city.name,
+        'description': city.description || `Город ${city.name} в ${city.region}`,
+        'geo': {
+          '@type': 'GeoCoordinates',
+          'latitude': city.lat,
+          'longitude': city.lon
+        },
+        'address': {
+          '@type': 'PostalAddress',
+          'addressRegion': city.region,
+          'addressCountry': 'RU'
+        },
+        'additionalProperty': [
+          {
+            '@type': 'PropertyValue',
+            'name': 'Температура',
+            'value': `${weatherData.temp}°C`
+          },
+          {
+            '@type': 'PropertyValue',
+            'name': 'Влажность',
+            'value': `${weatherData.humidity}%`
+          },
+          {
+            '@type': 'PropertyValue',
+            'name': 'Давление',
+            'value': `${weatherData.pressure} гПа`
+          }
+        ]
+      };
+      addStructuredData(schema);
+    }
+  }, [city, weatherData]);
 
   if (!city) {
     return (

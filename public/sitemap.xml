@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  
+  <!-- Главная страница -->
+  <url>
+    <loc>https://masclimat.ru/</loc>
+    <lastmod>2024-11-08</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <!-- Страница всех городов -->
+  <url>
+    <loc>https://masclimat.ru/cities</loc>
+    <lastmod>2024-11-08</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  
+  <!-- Москва -->
+  <url>
+    <loc>https://masclimat.ru/city/Москва</loc>
+    <lastmod>2024-11-08</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <!-- Санкт-Петербург -->
+  <url>
+    <loc>https://masclimat.ru/city/Санкт-Петербург</loc>
+    <lastmod>2024-11-08</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  
+  <!-- Новосибирск -->
+  <url>
+    <loc>https://masclimat.ru/city/Новосибирск</loc>
+    <lastmod>2024-11-08</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  
+  <!-- Екатеринбург -->
+  <url>
+    <loc>https://masclimat.ru/city/Екатеринбург</loc>
+    <lastmod>2024-11-08</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  
+  <!-- Казань -->
+  <url>
+    <loc>https://masclimat.ru/city/Казань</loc>
+    <lastmod>2024-11-08</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  
+  <!-- Нижний Новгород -->
+  <url>
+    <loc>https://masclimat.ru/city/Нижний Новгород</loc>
+    <lastmod>2024-11-08</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- Челябинск -->
+  <url>
+    <loc>https://masclimat.ru/city/Челябинск</loc>
+    <lastmod>2024-11-08</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- Самара -->
+  <url>
+    <loc>https://masclimat.ru/city/Самара</loc>
+    <lastmod>2024-11-08</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- Омск -->
+  <url>
+    <loc>https://masclimat.ru/city/Омск</loc>
+    <lastmod>2024-11-08</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- Ростов-на-Дону -->
+  <url>
+    <loc>https://masclimat.ru/city/Ростов-на-Дону</loc>
+    <lastmod>2024-11-08</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- Уфа -->
+  <url>
+    <loc>https://masclimat.ru/city/Уфа</loc>
+    <lastmod>2024-11-08</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- Красноярск -->
+  <url>
+    <loc>https://masclimat.ru/city/Красноярск</loc>
+    <lastmod>2024-11-08</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- Воронеж -->
+  <url>
+    <loc>https://masclimat.ru/city/Воронеж</loc>
+    <lastmod>2024-11-08</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- Пермь -->
+  <url>
+    <loc>https://masclimat.ru/city/Пермь</loc>
+    <lastmod>2024-11-08</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- Волгоград -->
+  <url>
+    <loc>https://masclimat.ru/city/Волгоград</loc>
+    <lastmod>2024-11-08</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- Краснодар -->
+  <url>
+    <loc>https://masclimat.ru/city/Краснодар</loc>
+    <lastmod>2024-11-08</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- Саратов -->
+  <url>
+    <loc>https://masclimat.ru/city/Саратов</loc>
+    <lastmod>2024-11-08</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <!-- Тюмень -->
+  <url>
+    <loc>https://masclimat.ru/city/Тюмень</loc>
+    <lastmod>2024-11-08</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <!-- Тольятти -->
+  <url>
+    <loc>https://masclimat.ru/city/Тольятти</loc>
+    <lastmod>2024-11-08</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <!-- Ижевск -->
+  <url>
+    <loc>https://masclimat.ru/city/Ижевск</loc>
+    <lastmod>2024-11-08</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <!-- Барнаул -->
+  <url>
+    <loc>https://masclimat.ru/city/Барнаул</loc>
+    <lastmod>2024-11-08</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+</urlset>

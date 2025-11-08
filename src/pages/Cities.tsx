@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import { russianCities } from '@/data/cities';
 import { getCurrentWeatherByCoords, getWeatherIcon, type WeatherData } from '@/lib/weatherApi';
+import { useSEO, addStructuredData } from '@/utils/seo';
 
 const Cities = () => {
   const [search, setSearch] = useState('');
@@ -14,6 +15,13 @@ const Cities = () => {
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
   const [weatherCache, setWeatherCache] = useState<Record<string, WeatherData>>({});
   const [loadingWeather, setLoadingWeather] = useState<Record<string, boolean>>({});
+
+  useSEO({
+    title: 'Все города России — прогноз погоды с картами | MASCLIMAT.RU',
+    description: 'Полный список городов России с актуальной погодой. Поиск по городу, фильтры по регионам и федеральным округам. Подробная информация о температуре, влажности, ветре и давлении для каждого города.',
+    keywords: 'города России, погода города России, прогноз погоды Россия, карта погоды, регионы России, федеральные округа',
+    canonicalUrl: 'https://masclimat.ru/cities'
+  });
 
   const regions = Array.from(new Set(russianCities.map(c => c.region))).sort();
   const districts = Array.from(new Set(russianCities.map(c => c.federalDistrict).filter(Boolean))).sort();
@@ -28,6 +36,35 @@ const Cities = () => {
       return matchesSearch && matchesRegion && matchesDistrict;
     })
     .sort((a, b) => b.population - a.population);
+
+  useEffect(() => {
+    const schema = {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      'name': 'Города России',
+      'description': 'Полный список городов России с прогнозом погоды',
+      'numberOfItems': russianCities.length,
+      'itemListElement': russianCities.slice(0, 20).map((city, index) => ({
+        '@type': 'ListItem',
+        'position': index + 1,
+        'item': {
+          '@type': 'Place',
+          'name': city.name,
+          'address': {
+            '@type': 'PostalAddress',
+            'addressRegion': city.region,
+            'addressCountry': 'RU'
+          },
+          'geo': {
+            '@type': 'GeoCoordinates',
+            'latitude': city.lat,
+            'longitude': city.lon
+          }
+        }
+      }))
+    };
+    addStructuredData(schema);
+  }, []);
 
   useEffect(() => {
     const loadWeatherForVisibleCities = async () => {

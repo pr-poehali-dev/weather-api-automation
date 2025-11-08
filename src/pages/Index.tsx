@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import { russianCities } from '@/data/cities';
 import { getCurrentWeather, getForecast, getWeatherIcon, getWindDirection, getVisibilityQuality, getHumidityComfort, type WeatherData, type ForecastData } from '@/lib/weatherApi';
+import { useSEO, addStructuredData, generateWeatherSchema } from '@/utils/seo';
 
 const CityMap = lazy(() => import('@/components/CityMap'));
 
@@ -23,6 +24,13 @@ const Index = () => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  useSEO({
+    title: `Погода в ${selectedCity} на сегодня, завтра, неделю | MASCLIMAT.RU`,
+    description: `Актуальный прогноз погоды в ${selectedCity}. Точная температура, осадки, ветер, давление. Почасовой прогноз на 24 часа и детальный прогноз на 10 дней.`,
+    keywords: `погода ${selectedCity}, прогноз погоды ${selectedCity}, температура ${selectedCity}, погода на сегодня ${selectedCity}, погода на завтра ${selectedCity}`,
+    canonicalUrl: 'https://masclimat.ru'
+  });
 
   useEffect(() => {
     const loadWeatherData = async () => {
@@ -45,6 +53,13 @@ const Index = () => {
 
     loadWeatherData();
   }, [selectedCity]);
+
+  useEffect(() => {
+    if (weatherData) {
+      const schema = generateWeatherSchema(selectedCity, weatherData.temp, weatherData.condition);
+      addStructuredData(schema);
+    }
+  }, [weatherData, selectedCity]);
 
   const currentTemp = weatherData?.temp ?? -5;
   const feelsLike = weatherData?.feels_like ?? -9;
