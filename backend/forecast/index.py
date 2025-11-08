@@ -95,10 +95,13 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         
     except urllib.error.HTTPError as e:
         error_body = e.read().decode() if e.fp else str(e)
+        error_msg = f'OpenWeatherMap API error: {error_body}'
+        if e.code == 401:
+            error_msg = 'API ключ недействителен или ещё не активирован. Новые ключи активируются в течение 1-2 часов после регистрации. Проверьте ключ на https://home.openweathermap.org/api_keys'
         return {
             'statusCode': e.code,
             'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-            'body': json.dumps({'error': f'Forecast API error: {error_body}'})
+            'body': json.dumps({'error': error_msg, 'api_status': e.code})
         }
     except Exception as e:
         return {
