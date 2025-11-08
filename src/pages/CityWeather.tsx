@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import Icon from '@/components/ui/icon';
 import { russianCities } from '@/data/cities';
 import { getCurrentWeatherByCoords, getForecastByCoords, getWeatherIcon, getWindDirection, getVisibilityQuality, getHumidityComfort, type WeatherData, type ForecastData } from '@/lib/weatherApi';
@@ -159,19 +160,91 @@ const CityWeather = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">{city.name}</h1>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span>{city.region}</span>
-            <span>•</span>
-            <span>Население: {(city.population / 1000).toFixed(0)}K</span>
-            <span>•</span>
-            <div className="flex items-center gap-1">
-              <Icon name="MapPin" size={14} />
-              <span>{city.lat.toFixed(2)}°, {city.lon.toFixed(2)}°</span>
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h1 className="text-4xl font-bold mb-3">{city.name}</h1>
+                <div className="flex flex-wrap items-center gap-3 text-sm">
+                  <Badge variant="default" className="text-sm">{city.region}</Badge>
+                  {city.federalDistrict && (
+                    <Badge variant="outline" className="text-sm">{city.federalDistrict}</Badge>
+                  )}
+                  {city.timezone && (
+                    <div className="flex items-center gap-1 text-muted-foreground">
+                      <Icon name="Clock" size={14} />
+                      <span>{city.timezone}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+            
+            {city.description && (
+              <p className="text-muted-foreground mb-4">{city.description}</p>
+            )}
+            
+            <Separator className="my-4" />
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="flex items-center gap-2">
+                <Icon name="Users" size={20} className="text-primary" />
+                <div>
+                  <div className="text-xs text-muted-foreground">Население</div>
+                  <div className="font-bold">{(city.population / 1000000).toFixed(2)} млн</div>
+                </div>
+              </div>
+              
+              {city.foundedYear && (
+                <div className="flex items-center gap-2">
+                  <Icon name="Calendar" size={20} className="text-primary" />
+                  <div>
+                    <div className="text-xs text-muted-foreground">Основан</div>
+                    <div className="font-bold">{city.foundedYear} год</div>
+                  </div>
+                </div>
+              )}
+              
+              {city.areaKm2 && (
+                <div className="flex items-center gap-2">
+                  <Icon name="Square" size={20} className="text-primary" />
+                  <div>
+                    <div className="text-xs text-muted-foreground">Площадь</div>
+                    <div className="font-bold">{city.areaKm2} км²</div>
+                  </div>
+                </div>
+              )}
+              
+              {city.elevation && (
+                <div className="flex items-center gap-2">
+                  <Icon name="Mountain" size={20} className="text-primary" />
+                  <div>
+                    <div className="text-xs text-muted-foreground">Высота</div>
+                    <div className="font-bold">{city.elevation} м</div>
+                  </div>
+                </div>
+              )}
+              
+              <div className="flex items-center gap-2">
+                <Icon name="MapPin" size={20} className="text-primary" />
+                <div>
+                  <div className="text-xs text-muted-foreground">Координаты</div>
+                  <div className="font-bold text-xs">{city.lat.toFixed(2)}°, {city.lon.toFixed(2)}°</div>
+                </div>
+              </div>
+              
+              {city.population && city.areaKm2 && (
+                <div className="flex items-center gap-2">
+                  <Icon name="Users" size={20} className="text-primary" />
+                  <div>
+                    <div className="text-xs text-muted-foreground">Плотность</div>
+                    <div className="font-bold">{Math.round(city.population / city.areaKm2)} чел/км²</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         {loading && (
           <div className="text-center py-8 text-muted-foreground">

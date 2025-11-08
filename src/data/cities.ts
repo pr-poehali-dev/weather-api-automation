@@ -4,14 +4,20 @@ export interface City {
   lat: number;
   lon: number;
   population: number;
+  timezone?: string;
+  foundedYear?: number;
+  areaKm2?: number;
+  elevation?: number;
+  federalDistrict?: string;
+  description?: string;
 }
 
 export const russianCities: City[] = [
-  { name: 'Москва', region: 'Москва', lat: 55.7558, lon: 37.6173, population: 12500000 },
-  { name: 'Санкт-Петербург', region: 'Ленинградская область', lat: 59.9343, lon: 30.3351, population: 5400000 },
-  { name: 'Новосибирск', region: 'Новосибирская область', lat: 55.0084, lon: 82.9357, population: 1620000 },
-  { name: 'Екатеринбург', region: 'Свердловская область', lat: 56.8389, lon: 60.6057, population: 1500000 },
-  { name: 'Казань', region: 'Татарстан', lat: 55.7964, lon: 49.1089, population: 1250000 },
+  { name: 'Москва', region: 'Москва', lat: 55.7558, lon: 37.6173, population: 12500000, timezone: 'UTC+3', foundedYear: 1147, areaKm2: 2561, elevation: 156, federalDistrict: 'Центральный', description: 'Столица России, крупнейший политический, экономический, культурный и научный центр страны' },
+  { name: 'Санкт-Петербург', region: 'Ленинградская область', lat: 59.9343, lon: 30.3351, population: 5400000, timezone: 'UTC+3', foundedYear: 1703, areaKm2: 1439, elevation: 3, federalDistrict: 'Северо-Западный', description: 'Культурная столица России, город на Неве с богатой историей и архитектурой' },
+  { name: 'Новосибирск', region: 'Новосибирская область', lat: 55.0084, lon: 82.9357, population: 1620000, timezone: 'UTC+7', foundedYear: 1893, areaKm2: 503, elevation: 164, federalDistrict: 'Сибирский', description: 'Крупнейший город Сибири, научный и культурный центр' },
+  { name: 'Екатеринбург', region: 'Свердловская область', lat: 56.8389, lon: 60.6057, population: 1500000, timezone: 'UTC+5', foundedYear: 1723, areaKm2: 468, elevation: 270, federalDistrict: 'Уральский', description: 'Столица Урала, четвертый по численности город России' },
+  { name: 'Казань', region: 'Татарстан', lat: 55.7964, lon: 49.1089, population: 1250000, timezone: 'UTC+3', foundedYear: 1005, areaKm2: 425, elevation: 61, federalDistrict: 'Приволжский', description: 'Столица Татарстана, спортивная столица России' },
   { name: 'Нижний Новгород', region: 'Нижегородская область', lat: 56.3269, lon: 44.0075, population: 1250000 },
   { name: 'Челябинск', region: 'Челябинская область', lat: 55.1644, lon: 61.4368, population: 1200000 },
   { name: 'Самара', region: 'Самарская область', lat: 53.2001, lon: 50.1500, population: 1160000 },

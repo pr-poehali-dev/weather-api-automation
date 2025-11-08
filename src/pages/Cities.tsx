@@ -1,27 +1,58 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import { russianCities } from '@/data/cities';
+import { getCurrentWeatherByCoords, getWeatherIcon, type WeatherData } from '@/lib/weatherApi';
 
 const Cities = () => {
   const [search, setSearch] = useState('');
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
+  const [weatherCache, setWeatherCache] = useState<Record<string, WeatherData>>({});
+  const [loadingWeather, setLoadingWeather] = useState<Record<string, boolean>>({});
 
   const regions = Array.from(new Set(russianCities.map(c => c.region))).sort();
+  const districts = Array.from(new Set(russianCities.map(c => c.federalDistrict).filter(Boolean))).sort();
   
   const filteredCities = russianCities
     .filter(city => {
       const matchesSearch = city.name.toLowerCase().includes(search.toLowerCase()) ||
-                           city.region.toLowerCase().includes(search.toLowerCase());
+                           city.region.toLowerCase().includes(search.toLowerCase()) ||
+                           (city.description || '').toLowerCase().includes(search.toLowerCase());
       const matchesRegion = !selectedRegion || city.region === selectedRegion;
-      return matchesSearch && matchesRegion;
+      const matchesDistrict = !selectedDistrict || city.federalDistrict === selectedDistrict;
+      return matchesSearch && matchesRegion && matchesDistrict;
     })
     .sort((a, b) => b.population - a.population);
 
-  const mockTemps = filteredCities.map(() => Math.floor(Math.random() * 30) - 15);
+  useEffect(() => {
+    const loadWeatherForVisibleCities = async () => {
+      const citiesToLoad = filteredCities.slice(0, 20);
+      
+      for (const city of citiesToLoad) {
+        if (!weatherCache[city.name] && !loadingWeather[city.name]) {
+          setLoadingWeather(prev => ({ ...prev, [city.name]: true }));
+          
+          try {
+            const weather = await getCurrentWeatherByCoords(city.lat, city.lon);
+            setWeatherCache(prev => ({ ...prev, [city.name]: weather }));
+          } catch (error) {
+            console.error(`Failed to load weather for ${city.name}:`, error);
+          } finally {
+            setLoadingWeather(prev => ({ ...prev, [city.name]: false }));
+          }
+        }
+      }
+    };
+
+    if (filteredCities.length > 0) {
+      loadWeatherForVisibleCities();
+    }
+  }, [filteredCities.map(c => c.name).join(',')]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -70,6 +101,37 @@ const Cities = () => {
 
                 <div>
                   <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-medium">Федеральные округа</label>
+                    {selectedDistrict && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedDistrict(null)}
+                        className="h-auto p-0 text-xs text-primary hover:text-primary/80"
+                      >
+                        Сбросить
+                      </Button>
+                    )}
+                  </div>
+                  <div className="space-y-1 mb-4">
+                    {districts.map((district) => (
+                      <button
+                        key={district}
+                        onClick={() => setSelectedDistrict(district === selectedDistrict ? null : district)}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
+                          selectedDistrict === district
+                            ? 'bg-primary text-primary-foreground font-medium'
+                            : 'hover:bg-secondary'
+                        }`}
+                      >
+                        {district}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-2">
                     <label className="text-sm font-medium">Регионы ({regions.length})</label>
                     {selectedRegion && (
                       <Button
@@ -82,7 +144,7 @@ const Cities = () => {
                       </Button>
                     )}
                   </div>
-                  <div className="space-y-1 max-h-[600px] overflow-y-auto pr-2">
+                  <div className="space-y-1 max-h-[400px] overflow-y-auto pr-2">
                     {regions.map((region) => (
                       <button
                         key={region}
@@ -119,45 +181,98 @@ const Cities = () => {
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredCities.map((city, idx) => (
-                <Link key={city.name} to={`/city/${city.name}`}>
-                  <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <h3 className="font-bold text-lg mb-1">{city.name}</h3>
-                          <p className="text-xs text-muted-foreground mb-2">{city.region}</p>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <Icon name="Users" size={12} />
-                            <span>{(city.population / 1000).toFixed(0)}K</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filteredCities.map((city) => {
+                const weather = weatherCache[city.name];
+                const isLoading = loadingWeather[city.name];
+                
+                return (
+                  <Link key={city.name} to={`/city/${city.name}`}>
+                    <Card className="hover:shadow-lg transition-all cursor-pointer h-full">
+                      <CardContent className="p-5">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex-1">
+                            <h3 className="font-bold text-xl mb-1">{city.name}</h3>
+                            <p className="text-sm text-muted-foreground mb-2">{city.region}</p>
+                            
+                            {city.federalDistrict && (
+                              <Badge variant="outline" className="mb-2 text-xs">
+                                {city.federalDistrict}
+                              </Badge>
+                            )}
+                            
+                            <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-2">
+                              <div className="flex items-center gap-1">
+                                <Icon name="Users" size={12} />
+                                <span>{(city.population / 1000000).toFixed(2)}M</span>
+                              </div>
+                              {city.foundedYear && (
+                                <div className="flex items-center gap-1">
+                                  <Icon name="Calendar" size={12} />
+                                  <span>{city.foundedYear} г.</span>
+                                </div>
+                              )}
+                              {city.areaKm2 && (
+                                <div className="flex items-center gap-1">
+                                  <Icon name="Square" size={12} />
+                                  <span>{city.areaKm2} км²</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div className="text-right ml-4">
+                            {isLoading ? (
+                              <div className="text-2xl text-muted-foreground">...</div>
+                            ) : weather ? (
+                              <>
+                                <Icon name={getWeatherIcon(weather.icon) as any} size={40} className="text-primary mb-2" />
+                                <div className="text-3xl font-bold text-primary">
+                                  {weather.temp}°
+                                </div>
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  {weather.condition}
+                                </div>
+                              </>
+                            ) : (
+                              <div className="text-3xl font-bold text-primary">
+                                {Math.floor(Math.random() * 30) - 15}°
+                              </div>
+                            )}
                           </div>
                         </div>
-                        <div className="text-right">
-                          <div className="text-3xl font-bold text-primary">
-                            {mockTemps[idx]}°
-                          </div>
-                        </div>
-                      </div>
 
-                      <div className="grid grid-cols-3 gap-2 pt-3 border-t">
-                        <div className="text-center">
-                          <Icon name="Droplets" size={14} className="mx-auto mb-1 text-muted-foreground" />
-                          <div className="text-xs font-medium">{Math.floor(Math.random() * 40) + 50}%</div>
+                        {city.description && (
+                          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                            {city.description}
+                          </p>
+                        )}
+
+                        <div className="grid grid-cols-4 gap-2 pt-3 border-t">
+                          <div className="text-center">
+                            <Icon name="Droplets" size={14} className="mx-auto mb-1 text-muted-foreground" />
+                            <div className="text-xs font-medium">{weather?.humidity ?? '-'}%</div>
+                          </div>
+                          <div className="text-center">
+                            <Icon name="Wind" size={14} className="mx-auto mb-1 text-muted-foreground" />
+                            <div className="text-xs font-medium">{weather?.wind_speed.toFixed(1) ?? '-'} м/с</div>
+                          </div>
+                          <div className="text-center">
+                            <Icon name="Gauge" size={14} className="mx-auto mb-1 text-muted-foreground" />
+                            <div className="text-xs font-medium">{weather ? Math.round(weather.pressure * 0.75) : '-'}</div>
+                          </div>
+                          {city.elevation && (
+                            <div className="text-center">
+                              <Icon name="Mountain" size={14} className="mx-auto mb-1 text-muted-foreground" />
+                              <div className="text-xs font-medium">{city.elevation}м</div>
+                            </div>
+                          )}
                         </div>
-                        <div className="text-center">
-                          <Icon name="Wind" size={14} className="mx-auto mb-1 text-muted-foreground" />
-                          <div className="text-xs font-medium">{Math.floor(Math.random() * 15) + 2} м/с</div>
-                        </div>
-                        <div className="text-center">
-                          <Icon name="Gauge" size={14} className="mx-auto mb-1 text-muted-foreground" />
-                          <div className="text-xs font-medium">{Math.floor(Math.random() * 30) + 995}</div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
+                      </CardContent>
+                    </Card>
+                  </Link>
+                );
+              })}
             </div>
 
             {filteredCities.length === 0 && (
