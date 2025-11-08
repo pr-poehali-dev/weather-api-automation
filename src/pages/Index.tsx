@@ -32,6 +32,8 @@ const Index = () => {
     canonicalUrl: 'https://masclimat.ru'
   });
 
+  const selectedCityData = russianCities.find(c => c.name === selectedCity);
+
   useEffect(() => {
     const loadWeatherData = async () => {
       try {
@@ -85,8 +87,6 @@ const Index = () => {
   const currentTemp = weatherData?.temp ?? -5;
   const feelsLike = weatherData?.feels_like ?? -9;
   const condition = weatherData?.condition ?? 'пасмурно';
-  
-  const selectedCityData = russianCities.find(c => c.name === selectedCity);
 
   const hourlyForecast = forecastData
     ? forecastData.forecast.slice(0, 6).map((item, idx) => ({
