@@ -272,7 +272,7 @@ const CityWeather = () => {
                       <Icon name="Thermometer" size={16} />
                       <span>Точка росы</span>
                     </div>
-                    <div className="text-2xl font-bold">{mockTemp - 5}°</div>
+                    <div className="text-2xl font-bold">{currentTemp - 5}°</div>
                     <div className="text-xs text-muted-foreground">Конденсация</div>
                   </div>
                 </div>
@@ -357,7 +357,7 @@ const CityWeather = () => {
                 <div className="bg-secondary/30 p-3 rounded-lg">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Точка росы</span>
-                    <span className="font-bold">{mockTemp - 5}°C</span>
+                    <span className="font-bold">{currentTemp - 5}°C</span>
                   </div>
                 </div>
 
@@ -378,14 +378,14 @@ const CityWeather = () => {
                 <div className="bg-secondary/30 p-3 rounded-lg">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Снежный покров</span>
-                    <span className="font-bold">{mockTemp < 0 ? '12 см' : '0 см'}</span>
+                    <span className="font-bold">{currentTemp < 0 ? '12 см' : '0 см'}</span>
                   </div>
                 </div>
 
                 <div className="bg-secondary/30 p-3 rounded-lg">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Индекс тепла</span>
-                    <span className="font-bold">{mockTemp > 20 ? mockTemp + 2 + '°' : 'Н/Д'}</span>
+                    <span className="font-bold">{currentTemp > 20 ? currentTemp + 2 + '°' : 'Н/Д'}</span>
                   </div>
                 </div>
               </CardContent>
