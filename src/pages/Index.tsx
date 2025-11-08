@@ -6,39 +6,105 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import { russianCities } from '@/data/cities';
+import { getCurrentWeather, getForecast, getWeatherIcon, getWindDirection, getVisibilityQuality, getHumidityComfort, type WeatherData, type ForecastData } from '@/lib/weatherApi';
 
 const Index = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedCity, setSelectedCity] = useState('Москва');
   const [searchQuery, setSearchQuery] = useState('');
+  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [forecastData, setForecastData] = useState<ForecastData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  const currentTemp = -5;
-  const feelsLike = -9;
-  const condition = 'пасмурно';
+  useEffect(() => {
+    const loadWeatherData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const [weather, forecast] = await Promise.all([
+          getCurrentWeather(selectedCity),
+          getForecast(selectedCity)
+        ]);
+        setWeatherData(weather);
+        setForecastData(forecast);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Ошибка загрузки данных');
+        console.error('Weather fetch error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const hourlyForecast = [
-    { time: 'Сейчас', temp: -5, condition: 'Cloud', precip: 0 },
-    { time: '01:00', temp: -6, condition: 'Cloud', precip: 0 },
-    { time: '02:00', temp: -6, condition: 'CloudSnow', precip: 20 },
-    { time: '03:00', temp: -7, condition: 'CloudSnow', precip: 40 },
-    { time: '04:00', temp: -7, condition: 'Cloud', precip: 10 },
-    { time: '05:00', temp: -8, condition: 'Cloud', precip: 0 },
-  ];
+    loadWeatherData();
+  }, [selectedCity]);
 
-  const weeklyForecast = [
-    { day: 'Пн', date: '11 нояб', icon: 'CloudSnow', tempMax: -3, tempMin: -8 },
-    { day: 'Вт', date: '12 нояб', icon: 'Cloud', tempMax: -2, tempMin: -7 },
-    { day: 'Ср', date: '13 нояб', icon: 'Sun', tempMax: 0, tempMin: -5 },
-    { day: 'Чт', date: '14 нояб', icon: 'Cloud', tempMax: 1, tempMin: -4 },
-    { day: 'Пт', date: '15 нояб', icon: 'CloudRain', tempMax: 2, tempMin: -3 },
-    { day: 'Сб', date: '16 нояб', icon: 'Cloud', tempMax: 0, tempMin: -5 },
-    { day: 'Вс', date: '17 нояб', icon: 'Sun', tempMax: 1, tempMin: -6 },
-  ];
+  const currentTemp = weatherData?.temp ?? -5;
+  const feelsLike = weatherData?.feels_like ?? -9;
+  const condition = weatherData?.condition ?? 'пасмурно';
+
+  const hourlyForecast = forecastData
+    ? forecastData.forecast.slice(0, 6).map((item, idx) => ({
+        time: idx === 0 ? 'Сейчас' : new Date(item.dt * 1000).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
+        temp: item.temp,
+        condition: getWeatherIcon(item.icon),
+        precip: Math.round(item.pop * 100)
+      }))
+    : [
+        { time: 'Сейчас', temp: -5, condition: 'Cloud', precip: 0 },
+        { time: '01:00', temp: -6, condition: 'Cloud', precip: 0 },
+        { time: '02:00', temp: -6, condition: 'CloudSnow', precip: 20 },
+        { time: '03:00', temp: -7, condition: 'CloudSnow', precip: 40 },
+        { time: '04:00', temp: -7, condition: 'Cloud', precip: 10 },
+        { time: '05:00', temp: -8, condition: 'Cloud', precip: 0 },
+      ];
+
+  const getDailyForecast = () => {
+    if (!forecastData) {
+      return [
+        { day: 'Пн', date: '11 нояб', icon: 'CloudSnow', tempMax: -3, tempMin: -8 },
+        { day: 'Вт', date: '12 нояб', icon: 'Cloud', tempMax: -2, tempMin: -7 },
+        { day: 'Ср', date: '13 нояб', icon: 'Sun', tempMax: 0, tempMin: -5 },
+        { day: 'Чт', date: '14 нояб', icon: 'Cloud', tempMax: 1, tempMin: -4 },
+        { day: 'Пт', date: '15 нояб', icon: 'CloudRain', tempMax: 2, tempMin: -3 },
+        { day: 'Сб', date: '16 нояб', icon: 'Cloud', tempMax: 0, tempMin: -5 },
+        { day: 'Вс', date: '17 нояб', icon: 'Sun', tempMax: 1, tempMin: -6 },
+      ];
+    }
+
+    const dailyMap = new Map();
+    forecastData.forecast.forEach(item => {
+      const date = new Date(item.dt * 1000);
+      const dateKey = date.toISOString().split('T')[0];
+      
+      if (!dailyMap.has(dateKey)) {
+        dailyMap.set(dateKey, {
+          date: date,
+          temps: [],
+          icons: []
+        });
+      }
+      
+      const dayData = dailyMap.get(dateKey);
+      dayData.temps.push(item.temp);
+      dayData.icons.push(item.icon);
+    });
+
+    return Array.from(dailyMap.values()).slice(0, 7).map(day => ({
+      day: day.date.toLocaleDateString('ru-RU', { weekday: 'short' }),
+      date: day.date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }),
+      icon: getWeatherIcon(day.icons[Math.floor(day.icons.length / 2)]),
+      tempMax: Math.round(Math.max(...day.temps)),
+      tempMin: Math.round(Math.min(...day.temps))
+    }));
+  };
+
+  const weeklyForecast = getDailyForecast();
 
   const topCities = russianCities.slice(0, 20);
 
@@ -126,38 +192,62 @@ const Index = () => {
                   </div>
                 </div>
 
+                {loading && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    Загрузка данных...
+                  </div>
+                )}
+                
+                {error && (
+                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
+                    <div className="flex items-start gap-2">
+                      <Icon name="AlertTriangle" size={20} className="text-orange-600 mt-0.5" />
+                      <div>
+                        <div className="font-medium text-orange-900">Не удалось загрузить данные</div>
+                        <div className="text-sm text-orange-700 mt-1">Убедитесь, что добавлен API ключ OpenWeatherMap в настройках секретов</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <div className="bg-secondary/50 rounded-lg p-4">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                       <Icon name="Wind" size={16} />
                       <span>Ветер</span>
                     </div>
-                    <div className="text-2xl font-bold">5.6 м/с</div>
-                    <div className="text-xs text-muted-foreground">СЗ, порывы до 12 м/с</div>
+                    <div className="text-2xl font-bold">{weatherData?.wind_speed.toFixed(1) ?? '5.6'} м/с</div>
+                    <div className="text-xs text-muted-foreground">
+                      {weatherData ? getWindDirection(weatherData.wind_deg) : 'СЗ'}, порывы до {weatherData?.wind_gust.toFixed(1) ?? '12'} м/с
+                    </div>
                   </div>
                   <div className="bg-secondary/50 rounded-lg p-4">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                       <Icon name="Gauge" size={16} />
                       <span>Давление</span>
                     </div>
-                    <div className="text-2xl font-bold">761</div>
-                    <div className="text-xs text-muted-foreground">мм рт.ст. (1015 гПа)</div>
+                    <div className="text-2xl font-bold">{weatherData ? Math.round(weatherData.pressure * 0.75) : '761'}</div>
+                    <div className="text-xs text-muted-foreground">мм рт.ст. ({weatherData?.pressure ?? '1015'} гПа)</div>
                   </div>
                   <div className="bg-secondary/50 rounded-lg p-4">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                       <Icon name="Droplets" size={16} />
                       <span>Влажность</span>
                     </div>
-                    <div className="text-2xl font-bold">89%</div>
-                    <div className="text-xs text-muted-foreground">Очень влажно</div>
+                    <div className="text-2xl font-bold">{weatherData?.humidity ?? '89'}%</div>
+                    <div className="text-xs text-muted-foreground">
+                      {weatherData ? getHumidityComfort(weatherData.humidity) : 'Очень влажно'}
+                    </div>
                   </div>
                   <div className="bg-secondary/50 rounded-lg p-4">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                       <Icon name="Eye" size={16} />
                       <span>Видимость</span>
                     </div>
-                    <div className="text-2xl font-bold">10 км</div>
-                    <div className="text-xs text-muted-foreground">Хорошая</div>
+                    <div className="text-2xl font-bold">{weatherData ? (weatherData.visibility / 1000).toFixed(0) : '10'} км</div>
+                    <div className="text-xs text-muted-foreground">
+                      {weatherData ? getVisibilityQuality(weatherData.visibility) : 'Хорошая'}
+                    </div>
                   </div>
                   <div className="bg-secondary/50 rounded-lg p-4">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
@@ -172,16 +262,22 @@ const Index = () => {
                       <Icon name="Cloud" size={16} />
                       <span>Облачность</span>
                     </div>
-                    <div className="text-2xl font-bold">85%</div>
-                    <div className="text-xs text-muted-foreground">Пасмурно</div>
+                    <div className="text-2xl font-bold">{weatherData?.clouds ?? '85'}%</div>
+                    <div className="text-xs text-muted-foreground">
+                      {(weatherData?.clouds ?? 85) > 75 ? 'Пасмурно' : (weatherData?.clouds ?? 85) > 50 ? 'Облачно' : 'Ясно'}
+                    </div>
                   </div>
                   <div className="bg-secondary/50 rounded-lg p-4">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                       <Icon name="Sunrise" size={16} />
                       <span>Восход</span>
                     </div>
-                    <div className="text-2xl font-bold">06:42</div>
-                    <div className="text-xs text-muted-foreground">Закат в 18:24</div>
+                    <div className="text-2xl font-bold">
+                      {weatherData ? new Date(weatherData.sunrise * 1000).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) : '06:42'}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Закат в {weatherData ? new Date(weatherData.sunset * 1000).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) : '18:24'}
+                    </div>
                   </div>
                   <div className="bg-secondary/50 rounded-lg p-4">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
@@ -204,8 +300,10 @@ const Index = () => {
                       <Icon name="Navigation" size={16} />
                       <span>Направление</span>
                     </div>
-                    <div className="text-2xl font-bold">330°</div>
-                    <div className="text-xs text-muted-foreground">Северо-западный</div>
+                    <div className="text-2xl font-bold">{weatherData?.wind_deg ?? '330'}°</div>
+                    <div className="text-xs text-muted-foreground">
+                      {weatherData ? getWindDirection(weatherData.wind_deg) : 'Северо-западный'}
+                    </div>
                   </div>
                   <div className="bg-secondary/50 rounded-lg p-4">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">

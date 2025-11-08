@@ -1,13 +1,43 @@
 import { useParams, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import { russianCities } from '@/data/cities';
+import { getCurrentWeatherByCoords, getForecastByCoords, getWeatherIcon, getWindDirection, getVisibilityQuality, getHumidityComfort, type WeatherData, type ForecastData } from '@/lib/weatherApi';
 
 const CityWeather = () => {
   const { cityName } = useParams<{ cityName: string }>();
   const city = russianCities.find(c => c.name === cityName);
+  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [forecastData, setForecastData] = useState<ForecastData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!city) return;
+    
+    const loadWeatherData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const [weather, forecast] = await Promise.all([
+          getCurrentWeatherByCoords(city.lat, city.lon),
+          getForecastByCoords(city.lat, city.lon)
+        ]);
+        setWeatherData(weather);
+        setForecastData(forecast);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Ошибка загрузки данных');
+        console.error('Weather fetch error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadWeatherData();
+  }, [city]);
 
   if (!city) {
     return (
@@ -26,34 +56,79 @@ const CityWeather = () => {
     );
   }
 
-  const mockTemp = Math.floor(Math.random() * 30) - 15;
-  const mockHumidity = Math.floor(Math.random() * 40) + 50;
-  const mockPressure = Math.floor(Math.random() * 30) + 995;
-  const mockWind = Math.floor(Math.random() * 15) + 2;
-  const mockClouds = Math.floor(Math.random() * 100);
-  const mockVisibility = Math.floor(Math.random() * 10) + 5;
-  const mockFeelsLike = mockTemp - 3;
+  const currentTemp = weatherData?.temp ?? Math.floor(Math.random() * 30) - 15;
+  const mockHumidity = weatherData?.humidity ?? Math.floor(Math.random() * 40) + 50;
+  const mockPressure = weatherData?.pressure ?? Math.floor(Math.random() * 30) + 995;
+  const mockWind = weatherData?.wind_speed ?? Math.floor(Math.random() * 15) + 2;
+  const mockClouds = weatherData?.clouds ?? Math.floor(Math.random() * 100);
+  const mockVisibility = weatherData?.visibility ?? (Math.floor(Math.random() * 10) + 5) * 1000;
+  const mockFeelsLike = weatherData?.feels_like ?? currentTemp - 3;
 
-  const hourlyForecast = Array.from({ length: 24 }).map((_, idx) => ({
-    time: `${String(idx).padStart(2, '0')}:00`,
-    temp: mockTemp + Math.sin(idx / 3) * 4,
-    condition: idx % 3 === 0 ? 'CloudRain' : idx % 2 === 0 ? 'Cloud' : 'Sun',
-    wind: Math.floor(Math.random() * 15) + 2,
-  }));
+  const hourlyForecast = forecastData
+    ? forecastData.forecast.slice(0, 24).map((item) => ({
+        time: new Date(item.dt * 1000).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
+        temp: item.temp,
+        condition: getWeatherIcon(item.icon),
+        wind: item.wind_speed,
+      }))
+    : Array.from({ length: 24 }).map((_, idx) => ({
+        time: `${String(idx).padStart(2, '0')}:00`,
+        temp: currentTemp + Math.sin(idx / 3) * 4,
+        condition: idx % 3 === 0 ? 'CloudRain' : idx % 2 === 0 ? 'Cloud' : 'Sun',
+        wind: Math.floor(Math.random() * 15) + 2,
+      }));
 
-  const dailyForecast = Array.from({ length: 10 }).map((_, idx) => {
-    const date = new Date();
-    date.setDate(date.getDate() + idx);
-    return {
-      day: idx === 0 ? 'Сегодня' : idx === 1 ? 'Завтра' : date.toLocaleDateString('ru-RU', { weekday: 'short' }),
-      date: date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }),
-      icon: idx % 3 === 0 ? 'CloudRain' : idx % 2 === 0 ? 'Cloud' : 'Sun',
-      condition: idx % 3 === 0 ? 'Дождь' : idx % 2 === 0 ? 'Облачно' : 'Ясно',
-      tempMax: Math.round(mockTemp + Math.sin(idx) * 5 + 2),
-      tempMin: Math.round(mockTemp + Math.sin(idx) * 5 - 3),
-      precip: idx % 3 === 0 ? 80 : 10,
-    };
-  });
+  const getDailyForecast = () => {
+    if (!forecastData) {
+      return Array.from({ length: 10 }).map((_, idx) => {
+        const date = new Date();
+        date.setDate(date.getDate() + idx);
+        return {
+          day: idx === 0 ? 'Сегодня' : idx === 1 ? 'Завтра' : date.toLocaleDateString('ru-RU', { weekday: 'short' }),
+          date: date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }),
+          icon: idx % 3 === 0 ? 'CloudRain' : idx % 2 === 0 ? 'Cloud' : 'Sun',
+          condition: idx % 3 === 0 ? 'Дождь' : idx % 2 === 0 ? 'Облачно' : 'Ясно',
+          tempMax: Math.round(currentTemp + Math.sin(idx) * 5 + 2),
+          tempMin: Math.round(currentTemp + Math.sin(idx) * 5 - 3),
+          precip: idx % 3 === 0 ? 80 : 10,
+        };
+      });
+    }
+
+    const dailyMap = new Map();
+    forecastData.forecast.forEach(item => {
+      const date = new Date(item.dt * 1000);
+      const dateKey = date.toISOString().split('T')[0];
+      
+      if (!dailyMap.has(dateKey)) {
+        dailyMap.set(dateKey, {
+          date: date,
+          temps: [],
+          icons: [],
+          conditions: [],
+          precips: []
+        });
+      }
+      
+      const dayData = dailyMap.get(dateKey);
+      dayData.temps.push(item.temp);
+      dayData.icons.push(item.icon);
+      dayData.conditions.push(item.condition);
+      dayData.precips.push(item.pop);
+    });
+
+    return Array.from(dailyMap.values()).slice(0, 10).map((day, idx) => ({
+      day: idx === 0 ? 'Сегодня' : idx === 1 ? 'Завтра' : day.date.toLocaleDateString('ru-RU', { weekday: 'short' }),
+      date: day.date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }),
+      icon: getWeatherIcon(day.icons[Math.floor(day.icons.length / 2)]),
+      condition: day.conditions[Math.floor(day.conditions.length / 2)],
+      tempMax: Math.round(Math.max(...day.temps)),
+      tempMin: Math.round(Math.min(...day.temps)),
+      precip: Math.round(Math.max(...day.precips) * 100)
+    }));
+  };
+
+  const dailyForecast = getDailyForecast();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -98,22 +173,40 @@ const CityWeather = () => {
           </div>
         </div>
 
+        {loading && (
+          <div className="text-center py-8 text-muted-foreground">
+            Загрузка данных...
+          </div>
+        )}
+        
+        {error && (
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+            <div className="flex items-start gap-2">
+              <Icon name="AlertTriangle" size={20} className="text-orange-600 mt-0.5" />
+              <div>
+                <div className="font-medium text-orange-900">Не удалось загрузить данные</div>
+                <div className="text-sm text-orange-700 mt-1">Убедитесь, что добавлен API ключ OpenWeatherMap</div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-6">
-                    <Icon name={mockClouds > 70 ? 'Cloud' : mockClouds > 30 ? 'CloudSun' : 'Sun'} size={80} className="text-primary" />
+                    <Icon name={weatherData ? getWeatherIcon(weatherData.icon) : (mockClouds > 70 ? 'Cloud' : mockClouds > 30 ? 'CloudSun' : 'Sun')} size={80} className="text-primary" />
                     <div>
-                      <div className="text-6xl font-bold">{mockTemp}°</div>
+                      <div className="text-6xl font-bold">{currentTemp}°</div>
                       <div className="text-muted-foreground mt-1">
                         Ощущается как {mockFeelsLike}°
                       </div>
                     </div>
                   </div>
                   <Badge variant="outline" className="text-lg px-4 py-2">
-                    {mockClouds > 70 ? 'Облачно' : mockClouds > 30 ? 'Переменная облачность' : 'Ясно'}
+                    {weatherData?.condition ?? (mockClouds > 70 ? 'Облачно' : mockClouds > 30 ? 'Переменная облачность' : 'Ясно')}
                   </Badge>
                 </div>
 
@@ -124,31 +217,31 @@ const CityWeather = () => {
                       <span>Влажность</span>
                     </div>
                     <div className="text-2xl font-bold">{mockHumidity}%</div>
-                    <div className="text-xs text-muted-foreground">{mockHumidity > 70 ? 'Влажно' : 'Комфортно'}</div>
+                    <div className="text-xs text-muted-foreground">{weatherData ? getHumidityComfort(mockHumidity) : (mockHumidity > 70 ? 'Влажно' : 'Комфортно')}</div>
                   </div>
                   <div className="bg-secondary/50 p-4 rounded-lg">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                       <Icon name="Gauge" size={16} />
                       <span>Давление</span>
                     </div>
-                    <div className="text-2xl font-bold">{mockPressure}</div>
-                    <div className="text-xs text-muted-foreground">мм рт.ст. ({Math.round(mockPressure * 1.333)} гПа)</div>
+                    <div className="text-2xl font-bold">{Math.round(mockPressure * 0.75)}</div>
+                    <div className="text-xs text-muted-foreground">мм рт.ст. ({mockPressure} гПа)</div>
                   </div>
                   <div className="bg-secondary/50 p-4 rounded-lg">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                       <Icon name="Wind" size={16} />
                       <span>Ветер</span>
                     </div>
-                    <div className="text-2xl font-bold">{mockWind}</div>
-                    <div className="text-xs text-muted-foreground">м/с, порывы до {mockWind + 3}</div>
+                    <div className="text-2xl font-bold">{mockWind.toFixed(1)}</div>
+                    <div className="text-xs text-muted-foreground">м/с, {weatherData ? getWindDirection(weatherData.wind_deg) : 'СЗ'}</div>
                   </div>
                   <div className="bg-secondary/50 p-4 rounded-lg">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                       <Icon name="Eye" size={16} />
                       <span>Видимость</span>
                     </div>
-                    <div className="text-2xl font-bold">{mockVisibility}</div>
-                    <div className="text-xs text-muted-foreground">км, {mockVisibility > 8 ? 'хорошая' : 'средняя'}</div>
+                    <div className="text-2xl font-bold">{(mockVisibility / 1000).toFixed(0)}</div>
+                    <div className="text-xs text-muted-foreground">км, {weatherData ? getVisibilityQuality(mockVisibility) : (mockVisibility > 8000 ? 'хорошая' : 'средняя')}</div>
                   </div>
                   <div className="bg-secondary/50 p-4 rounded-lg">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
