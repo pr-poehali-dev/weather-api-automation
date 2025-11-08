@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 
@@ -63,16 +65,24 @@ const Index = () => {
         
         <header className="glass rounded-2xl p-6 animate-fade-in">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div>
+            <div className="flex-1">
               <h1 className="text-4xl md:text-5xl font-bold text-primary glow">МЕТЕО·РФ</h1>
               <p className="text-muted-foreground mt-2">Погодный мониторинг в реальном времени</p>
             </div>
-            <div className="flex flex-col items-end gap-1">
-              <div className="text-3xl font-bold text-secondary glow">
-                {currentTime.toLocaleTimeString('ru-RU')}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                {currentTime.toLocaleDateString('ru-RU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            <div className="flex items-center gap-3">
+              <Link to="/cities">
+                <Button className="glass border-primary/50 hover:glow-box">
+                  <Icon name="Map" size={18} className="mr-2" />
+                  Все города
+                </Button>
+              </Link>
+              <div className="flex flex-col items-end gap-1">
+                <div className="text-3xl font-bold text-secondary glow">
+                  {currentTime.toLocaleTimeString('ru-RU')}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {currentTime.toLocaleDateString('ru-RU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                </div>
               </div>
             </div>
           </div>
@@ -142,7 +152,15 @@ const Index = () => {
               </div>
 
               <div className="space-y-3 pt-4">
-                <h3 className="font-semibold text-lg">Прогноз на 7 дней</h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-lg">Прогноз на 7 дней</h3>
+                  <Link to={`/city/${selectedCity}`}>
+                    <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80">
+                      Подробнее
+                      <Icon name="ArrowRight" size={16} className="ml-1" />
+                    </Button>
+                  </Link>
+                </div>
                 <div className="grid grid-cols-7 gap-2">
                   {['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'].map((day, idx) => (
                     <div key={idx} className="glass p-3 rounded-lg text-center">
