@@ -115,7 +115,7 @@ const Index = () => {
           <div className="flex items-center justify-between gap-4">
             <Link to="/" className="flex items-center gap-2">
               <Icon name="CloudSun" size={32} className="text-primary" />
-              <span className="text-2xl font-bold text-primary">RU-METEO</span>
+              <span className="text-2xl font-bold text-primary">MASCLIMAT.RU</span>
             </Link>
 
             <div className="flex-1 max-w-md">
@@ -538,7 +538,7 @@ const Index = () => {
       <footer className="bg-white border-t border-gray-200 mt-12">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="text-center text-sm text-muted-foreground">
-            <p>© 2024 RU-METEO. Прогноз погоды для городов России</p>
+            <p>© 2024 MASCLIMAT.RU. Прогноз погоды для городов России</p>
           </div>
         </div>
       </footer>

@@ -137,7 +137,7 @@ const CityWeather = () => {
           <div className="flex items-center justify-between gap-4">
             <Link to="/" className="flex items-center gap-2">
               <Icon name="CloudSun" size={32} className="text-primary" />
-              <span className="text-2xl font-bold text-primary">RU-METEO</span>
+              <span className="text-2xl font-bold text-primary">MASCLIMAT.RU</span>
             </Link>
 
             <div className="flex items-center gap-2">
